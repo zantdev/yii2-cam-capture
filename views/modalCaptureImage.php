@@ -19,6 +19,7 @@
 
 <?php 
 use yii\web\View;
+use yii\helpers\Url;
 
 $this->registerJs(
   "
@@ -30,13 +31,51 @@ $this->registerJs(
     },
   };
 
+  var hasInvokedRemAvatar = false;
+
+  function invokeRemoveAvatar() {
+    $('#btn-remove-capture').on('click', function(e){
+      var id = $(this).attr('data-id');
+      c = confirm('Are you sure to remove avatar?');
+      if (c) {
+        if (id) {
+          $.ajax({
+            type: 'POST',
+            url: '".Url::to(["gallery4/api/delete-persistent"])."',
+            data: {
+              id: id,
+            },
+            success: function(data){
+              if (data.success) {
+                $('.avatar-container').find('.file-default-preview *').remove();
+                setTimeout(function(){
+                  $('.avatar-container').find('.file-default-preview').append('$noPreview');
+                }, 200)
+              }
+            }
+          })
+        }else {
+          $('#avatar-fileinput').val('');
+          $('.avatar-container').find('.file-default-preview *').remove();
+          setTimeout(function(){
+            $('.avatar-container').find('.file-default-preview').append('$noPreview');
+          }, 200)
+        }
+      }
+    });
+  }
+
+  const tplRemove = `<button type='button' class='btn btn-secondary' data-id='' id='btn-remove-capture' title='Remove'>
+      <i class='cil-trash'></i>
+    </button>`;
+
   $('#btn-show-capture').on('click', function(e){
     navigator.mediaDevices.getUserMedia(constraints)
       .then((stream) => {
         // Attach the video stream to the video element and autoplay.
         $('#player')[0].srcObject = stream;
       });
-  })
+  });
 
   $('#capture').on('click', function(e){
     $('#canvas')[0].getContext('2d').drawImage(
@@ -51,20 +90,8 @@ $this->registerJs(
 
       var tpl = `
         <div class='file-drop-zone clearfix'>
-          <div class='file-preview-thumbnails clearfix'>
-            <div class='file-preview-frame krajee-default  kv-preview-thumb' id='thumb-w1-11305_asus-zenpad-c.jpg' data-fileindex='0' data-fileid='11305_asus-zenpad-c.jpg' data-template='image'>
-              <div class='kv-file-content'>
-                <img class='img-capture' src='\${img}' />
-              </div>
-            </div>
-
-            <div class='kv-zoom-cache' style='display:none'>
-              <div class='file-preview-frame krajee-default  kv-zoom-thumb' id='zoom-thumb-w1-11305_asus-zenpad-c.jpg' data-fileindex='0' data-fileid='11305_asus-zenpad-c.jpg' data-template='image'>
-                <div class='kv-file-content'>
-                  <img class='img-capture' src='\${img}' />
-                </div>
-              </div>
-            </div>
+          <div class='file-default-preview'>
+            <img id='img-avatar' src='\${img}' alt='Avatar'>
           </div>
         </div>
       `;
@@ -73,10 +100,21 @@ $this->registerJs(
       $('#modalCaptureImage').modal('hide');
       $('#player').show();
       $('#canvas').hide();
+
+      var hasButtonRemove = $('.avatar-action').children('#btn-remove-capture');
+      if (hasButtonRemove.length == 0) {
+        $('.avatar-action').append(tplRemove);
+      }
+      if (!hasInvokedRemAvatar){
+        invokeRemoveAvatar();
+        hasInvokedRemAvatar = true;
+      }
     }, 200);
   });
+  invokeRemoveAvatar();
   ",  
     View::POS_READY,
     'capture-image-handler'
 );
 ?>
+
