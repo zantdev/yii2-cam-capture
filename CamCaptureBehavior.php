@@ -19,7 +19,7 @@ class CamCaptureBehavior extends Behavior
         return [
             ActiveRecord::EVENT_AFTER_INSERT => 'updateCreateOwnerModel',
             ActiveRecord::EVENT_AFTER_UPDATE => 'updateCreateOwnerModel',
-            // ActiveRecord::EVENT_BEFORE_DELETE => 'beforeDeleteOwnerModel',
+            ActiveRecord::EVENT_BEFORE_DELETE => 'beforeDeleteOwnerModel',
         ];
     }
 
@@ -73,6 +73,28 @@ class CamCaptureBehavior extends Behavior
                     );
                     $galleryOwner->created_at = date('Y-m-d H:i:s');
                     $galleryOwner->save();
+                }
+            }
+        }
+    }
+
+    public function beforeDeleteOwnerModel($event) {
+        $gallery = Gallery4::find()->joinWith('go')->where([
+            'owner_id' => strval($this->model->primaryKey),
+            'model' => StringHelper::basename(
+                $this->model::className()
+            ),
+            'category' => 'CAMCAPTURE'
+        ])->one();
+
+        if ($gallery) {
+            $filePath = Yii::$app->basePath."/web/media/".
+                $gallery->name.".".$gallery->ext;
+            if (FileHelper::unlink($filePath)) {
+                if (GalleryOwner::deleteAll([
+                    'gallery_id' => $gallery->id
+                ])) {
+                    $gallery->delete();
                 }
             }
         }
