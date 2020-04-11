@@ -78,7 +78,8 @@ Note: Working on with yii2-bootstrap4 only, to shift onto bootstrap4, follow [th
         'ownerModel' => $model
     ]); ?>
     ```
-6. Viola
+6. Make a folder "media" under @web
+7. Viola
 
 Screenshots
 - Widget
