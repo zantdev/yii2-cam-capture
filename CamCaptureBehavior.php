@@ -38,7 +38,7 @@ class CamCaptureBehavior extends Behavior
                     'model' => StringHelper::basename(
                         $this->model::className()
                     ),
-                    'category' => 'CAMCAPTURE'
+                    'gallery_4.category' => 'CAMCAPTURE'
                 ])->one();
                 if ($gallery) {
                     $newGallery = false;
@@ -84,7 +84,7 @@ class CamCaptureBehavior extends Behavior
             'model' => StringHelper::basename(
                 $this->model::className()
             ),
-            'category' => 'CAMCAPTURE'
+            'gallery_4.category' => 'CAMCAPTURE'
         ])->one();
 
         if ($gallery) {
