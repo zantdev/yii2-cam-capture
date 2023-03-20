@@ -52,7 +52,7 @@ class CamCaptureWidget extends \yii\base\Widget
             'model' => StringHelper::basename(
                 $this->ownerModel::className()
             ),
-            'category' => 'CAMCAPTURE'
+            'gallery_4.category' => 'CAMCAPTURE'
         ])->one();
         
         if ($gallery) {
